@@ -1,0 +1,220 @@
+#include <Wire.h>
+#include <WiFi.h>
+#include <ArduinoJson.h>
+#include <PubSubClient.h>
+#include <LiquidCrystal_I2C.h>
+
+// Configurações de WiFi
+const char *SSID = "Wokwi-GUEST";
+const char *PASSWORD = "";  // Substitua pelo sua senha
+
+// Configurações de MQTT
+const char *BROKER_MQTT = "broker.hivemq.com";
+const int BROKER_PORT = 1883;
+const char *ID_MQTT = "pedro_mqtt";
+const char *TOPIC_MENU = "fiap/iot/gs/menu";
+
+// Configurações de Hardware
+#define PUBLISH_DELAY 2000
+
+// Variáveis globais
+WiFiClient espClient;
+PubSubClient MQTT(espClient);
+unsigned long publishUpdate = 0;
+const int TAMANHO = 200;
+bool isSubmenu = false;
+
+// Objeto para controle do LCD
+LiquidCrystal_I2C LCD(0x27, 20, 4);  
+
+// Protótipos de funções
+void initWiFi();
+void initMQTT();
+void callbackMQTT(char *topic, byte *payload, unsigned int length);
+void reconnectMQTT();
+void reconnectWiFi();
+void checkWiFIAndMQTT();
+void exibirMenu();
+void processarEscolha(int escolha);
+
+// Variável para armazenar a escolha do menu
+int escolhaAtual = 0;
+
+void initWiFi() {
+  Serial.print("Conectando com a rede: ");
+  Serial.println(SSID);
+  WiFi.begin(SSID, PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.print("Conectado com sucesso: ");
+  Serial.println(SSID);
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+void initMQTT() {
+  MQTT.setServer(BROKER_MQTT, BROKER_PORT);
+  MQTT.setCallback(callbackMQTT);
+}
+
+//mensagens via mqtt
+void callbackMQTT(char *topic, byte *payload, unsigned int length) {
+  String msg = String((char *)payload).substring(0, length);
+
+  Serial.printf("Mensagem recebida via MQTT: %s do topico: %s\n", msg.c_str(), topic);
+
+
+  //A mensagem é um número representando a opção do menu
+  int novaEscolha = msg.toInt();
+  if (novaEscolha >= 1 && novaEscolha <= 3) {
+    escolhaAtual = novaEscolha;
+    exibirMenu();
+  }
+}
+
+void reconnectMQTT() {
+  while (!MQTT.connected()) {
+    Serial.print("Tentando conectar com o Broker MQTT: ");
+    Serial.println(BROKER_MQTT);
+
+    if (MQTT.connect(ID_MQTT)) {
+      Serial.println("Conectado ao broker MQTT!");
+      MQTT.subscribe(TOPIC_MENU);
+    } else {
+      Serial.println("Falha na conexão com MQTT. Tentando novamente em 2 segundos.");
+      delay(2000);
+    }
+  }
+}
+
+void checkWiFIAndMQTT() {
+  if (WiFi.status() != WL_CONNECTED)
+    reconnectWiFi();
+  if (!MQTT.connected())
+    reconnectMQTT();
+}
+
+void reconnectWiFi(void) {
+  if (WiFi.status() == WL_CONNECTED)
+    return;
+
+  WiFi.begin(SSID, PASSWORD); // Conecta na rede WI-FI
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.print("Wifi conectado com sucesso");
+  Serial.print(SSID);
+  Serial.println("IP: ");
+  Serial.println(WiFi.localIP());
+}
+
+//funcao de exibicao do menu
+void exibirMenu() {
+  LCD.clear();
+  LCD.setCursor(0, 0);
+  LCD.print("Menu:");
+  for (int i = 1; i <= 3; i++) {
+    LCD.setCursor(0, i);
+    LCD.print(i == escolhaAtual ? "> " : "  ");
+    LCD.print(i);
+    LCD.print(". ");
+    switch (i) {
+      case 1:
+        LCD.print("Atendimento");
+        break;
+      case 2:
+        LCD.print("Exames");
+        break;
+      case 3:
+        LCD.print("Termos");
+        break;
+    }
+  }
+}
+
+//funcao que processa a escolha feita via mqtt
+void processarEscolha(int escolha) {
+  Serial.printf("Escolha do menu processada: %d - ", escolha);
+  switch (escolha) {
+    case 1:
+
+      Serial.println("Atendimento");
+      LCD.clear();
+      LCD.setCursor(0,0);
+      LCD.print("Opcao de escolha: ");
+      LCD.setCursor(2,1);
+      LCD.print("1. Consultas");
+      LCD.setCursor(2,2);
+      LCD.print("2. IA");
+      delay(5000);
+      break;
+
+    case 2:
+
+      Serial.println("Exames");
+      LCD.clear();
+      LCD.print("Os exames pedidos:");
+      LCD.setCursor(0,1);
+      LCD.print("aparecerao aqui");
+      LCD.setCursor(0,2);
+      LCD.print("digitalizados");
+      delay(5000); 
+      break;
+
+    case 3:
+
+      Serial.println("Termos");
+      LCD.clear();
+      LCD.print("Aqui os termos ");
+      LCD.setCursor(0,1);
+      LCD.print("caso necessario");
+      delay(5000); 
+      break;
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+
+  // Inicializa o LCD
+  LCD.init();
+  LCD.backlight();
+  LCD.setCursor(0, 0);
+  LCD.print("Conectando a ");
+  LCD.setCursor(0, 1);
+  LCD.print("WiFi ");
+  initWiFi();
+  initMQTT();
+  exibirMenu();
+}
+
+void loop() {
+ checkWiFIAndMQTT();
+ MQTT.loop();
+
+ if ((millis() - publishUpdate) >= PUBLISH_DELAY) {
+    publishUpdate = millis();
+
+    char buffer[TAMANHO];
+    Serial.println(buffer);
+ }
+ // Aqui você pode adicionar lógica para processar a escolha do menu se necessário
+ if (escolhaAtual != 0) {
+    processarEscolha(escolhaAtual);
+    escolhaAtual = 0; // Reseta a escolha após o processamento
+    
+ }
+ delay(1000);
+}
+
+

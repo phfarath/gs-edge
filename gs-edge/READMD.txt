@@ -1,0 +1,12 @@
+
+O tema abordado para esta gs, é muito delicado e esta muito presente na realidade.
+Muitos hospitais sofrem de superlotacao, carecem de tecnologias de ponta e nosso objetivo é trazer isso de uma forma util e automatica. 
+
+Visando a automacao, nos pensamos em um atendimento via IA, que localiza nas proximidades do cliente + um lugar para exibicao dos exames,com integracao ao sistema MV, evitando o esquecimento e poupando tempo dos pacientes e medicos + disponibilizacao dos termos de cirurgia e anestesia, pois atualmente é tudo feito a base de papel e tem um procedimento longo e demorado.
+Esperamos assim agilizar a vida dos pacientes e dos medicos, aumentar o fluxo de pessoas em hospitais, salvar dados com facil acesso de pacientes e medicos e evitar o processo demorado de pacientes que precisam de cirurgias rapidas.
+
+A aplicacao
+A aplicacao é simples, se baseia em uma troca de dados via mqtt entre o node-red e o circuito no wokwi, basta iniciar a simulacao e injetar as opcoes pelo node-red, com exibicao no debug.
+
+link do projeto
+https://wokwi.com/projects/381852888423795713
