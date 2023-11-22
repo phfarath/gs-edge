@@ -1,0 +1,236 @@
+[
+    {
+        "id": "befc599cc06b86f6",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3aae37e19ba309de",
+        "type": "inject",
+        "z": "befc599cc06b86f6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "conteudo",
+                "v": "Aqui se terao duas opcoes, Marcar Consultas ou Conversa com ia",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Atendimento",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 210,
+        "y": 180,
+        "wires": [
+            [
+                "f580b627db5e4889"
+            ]
+        ]
+    },
+    {
+        "id": "6e7b95c93042636d",
+        "type": "inject",
+        "z": "befc599cc06b86f6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "conteudo",
+                "v": "Aqui se exibirao seus exames, caso tenha algum para fazer.",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Exames",
+        "payload": "2",
+        "payloadType": "num",
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "f580b627db5e4889"
+            ]
+        ]
+    },
+    {
+        "id": "fcc85fb6de2b8d09",
+        "type": "inject",
+        "z": "befc599cc06b86f6",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "conteudo",
+                "v": "Aqui se exibirao termos de cirurgia e anestesia, poupando tempo para ambos, paciete e medico.",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "Termos",
+        "payload": "3",
+        "payloadType": "num",
+        "x": 200,
+        "y": 260,
+        "wires": [
+            [
+                "f580b627db5e4889"
+            ]
+        ]
+    },
+    {
+        "id": "f580b627db5e4889",
+        "type": "function",
+        "z": "befc599cc06b86f6",
+        "name": "function 1",
+        "func": "function retornarValor(input) {\n  if (msg.payload == 1) {\n    msg= 1;\n  } else if (msg.payload == 2) {\n    msg= 2;\n  } else if (msg.payload == 3) {\n    msg= 3;\n  }else {\n    return \"Entrada inválida\";\n  }\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 220,
+        "wires": [
+            [
+                "43e229bf1d15bd66",
+                "ebabecf00cb49e16"
+            ]
+        ]
+    },
+    {
+        "id": "43e229bf1d15bd66",
+        "type": "mqtt out",
+        "z": "befc599cc06b86f6",
+        "name": "",
+        "topic": "fiap/iot/gs/menu",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "89b6a15454179cab",
+        "x": 600,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "1fee1b1ccaefedbc",
+        "type": "debug",
+        "z": "befc599cc06b86f6",
+        "name": "saida",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "conteudo",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "ebabecf00cb49e16",
+        "type": "template",
+        "z": "befc599cc06b86f6",
+        "name": "",
+        "field": "topic",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Entrado em {{topic}}:",
+        "output": "str",
+        "x": 560,
+        "y": 260,
+        "wires": [
+            [
+                "7b840b08226a4f63",
+                "1fee1b1ccaefedbc"
+            ]
+        ]
+    },
+    {
+        "id": "7b840b08226a4f63",
+        "type": "debug",
+        "z": "befc599cc06b86f6",
+        "name": "saida",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "topic",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "89b6a15454179cab",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mqtt-dashboard.com",
+        "port": "1883",
+        "clientid": "clientId-f1kKV2X1TM",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
